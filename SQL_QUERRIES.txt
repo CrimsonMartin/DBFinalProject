@@ -1,0 +1,91 @@
+(STATIC) PLACES OF SERVICE THAT SELL BEER BUT NO WHISKEY
+
+SELECT DISTINCT p.name, p.address
+FROM Place_Of_Service p, Drink d, Sells s
+WHERE d.type = 'beer' AND 
+	s.drinkname = d.name AND
+	s.pos_id = p.id
+EXCEPT
+SELECT DISTINCT p.name, p.address
+FROM Place_Of_Service p, Drink d, Sells s
+WHERE d.type = 'whiskey' AND 
+	s.drinkname = d.name AND
+	s.pos_id = p.id
+_____________________________________________________________
+(DYNAMIC) FIND POS AND DRINKS SOLD FOR UNDER INPUT AMOUNT
+
+SELECT p.name, s.drinkname, s.price
+FROM Place_of_Service p, Sells s
+WHERE p.id = s.pos_id AND 
+    s.price <= 3.5
+ORDER BY p.name
+_______________________________________________________________________
+(DYNAMIC) FIND EVENTS, THEIR TIMES, AND THIER DATES HOSTED BY AN INPUT PLACE OF SERVICE
+
+SELECT e.name, e.startTime, e.dateOfEvent
+FROM Place_of_Service p, Hosts h, Event e
+WHERE p.name = 'BP' AND
+	p.id = h.pos_id AND
+	h.eventname = e.name
+________________________________________________
+(STATIC) FIND THE BEST BARTENDERS BY RATING AND SHOW THIER NAME, SHIFT, AND PLACE THEY WORK
+
+SELECT b.name, b.rating, w.start_shift, w.end_shift, p.name, p.address
+FROM Bartender b, Works w, Place_Of_Service p
+WHERE b.name = w.bartendername AND
+	W.POS_ID = p.ID AND
+	b.rating >= ALL (SELECT rating
+			FROM bartender)
+____________________________________________________
+(DYNAMIC) FIND THE CHEAPEST PLACE AND PRICE TO GET THE INPUT DRINK NAME
+
+SELECT p.name, p.address, s.price
+FROM Place_Of_Service p, Sells s
+WHERE s.drinkname = 'Miller Lite' AND
+	s.pos_id = p.id AND
+	s.price <= ALL (SELECT s2.price
+			FROM Sells s2
+			WHERE s2.drinkname= 'Miller Lite')
+_____________________________________________________
+(DYNAMIC) SHOW THE PLACES OF SERVICE THAT ARE OPEN AND THEIR TIMES GIVEN THE INPUT DAY OF WEEK
+
+SELECT p.name, o.open_hour, o.close_hour
+FROM Place_Of_Service p, Operational_Times o, is_Open i
+WHERE o.open_day = 'Monday' AND
+	o.OT = i.OT AND
+	i.POS_ID = p.id
+______________________________________________________
+(DYNAMIC) SHOW ALL THE DRINK NAMES AND TYPES MADE BY A COMPANY IN THE INPUT COUNTRY
+
+SELECT d.name, d.type
+FROM Drink d, Company c, Makes m
+WHERE c.country = 'United States' AND
+	c.cname = m.cname AND
+	m.drinkname = d.name
+_______________________________________________________
+(Static) FIND THE AVERAGE PRICE BY PLACE OF SALE
+
+SELECT p.name, m.name, avg(s.price)
+FROM Place_Of_Service p, manager m, manages q, sells s
+WHERE p.id = q.pos_id AND
+	q.mid = m.mid AND
+	s.pos_id = p.id
+GROUP BY p.name, m.name
+_______________________________________________________________
+(STATIC) SHOW ALL EVENTS BY EVENT NAME, ITS DATE, AND A COUNT OF THE ATTENDENCE
+
+SELECT e.name, e.dateofevent, COUNT(a)
+FROM Event e, Attend a
+Where e.name = a.eventname
+GROUP BY e.name, e.dateofevent
+______________________________________________________________
+(DYNAMIC) SHOW THE NUMBER OF DRINKS BOUGHT BY TYPE OF THE INPUT GRADUATION YEAR
+
+SELECT d.type, sum(b.num_bought) 
+FROM Student s, Drink d, Buys b
+WHERE s.year = 2017 AND
+	b.sid = s.sid AND
+	d.name = b.drinkname
+GROUP BY d.type
+________________________________________________________________
+	
